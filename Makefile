@@ -1,16 +1,16 @@
-CC  := gcc -m32 -ffreestanding -O3 -fno-stack-protector -fno-stack-check -nostdlib
-AS  := nasm -f elf32
-LD  := ld -m elf_i386
+CC := gcc -m32 -ffreestanding -O3 -fno-stack-protector -fno-stack-check -nostdlib -Isrc/core/inc
+AS := nasm -f elf32
+LD := ld -m elf_i386
 
 S_DIR := src
 B_DIR := bin
 ISO_D := $(B_DIR)/iso
-TAR   := $(B_DIR)/24Oskernel.bin
-ISO   := $(B_DIR)/24Os.iso
+TAR := $(B_DIR)/24Oskernel.bin
+ISO := $(B_DIR)/24Os.iso
 
-SRCS  := $(shell find $(S_DIR) -type f \( -name "*.c" -o -name "*.asm" \))
-OBJS  := $(patsubst $(S_DIR)/%.c,$(B_DIR)/%.o,$(patsubst $(S_DIR)/%.asm,$(B_DIR)/%.o,$(SRCS)))
-DEPS  := $(OBJS:.o=.d)
+SRCS := $(shell find $(S_DIR) -type f \( -name "*.c" -o -name "*.asm" \))
+OBJS := $(patsubst $(S_DIR)/%.c,$(B_DIR)/%.o,$(patsubst $(S_DIR)/%.asm,$(B_DIR)/%.o,$(SRCS)))
+DEPS := $(OBJS:.o=.d)
 
 G := \033[32m
 R := \033[31m
@@ -43,5 +43,4 @@ run: $(ISO)
 clean:
 	@rm -rf $(B_DIR)
 
-# Включение зависимостей от заголовков
 -include $(DEPS)
