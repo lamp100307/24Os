@@ -24,7 +24,7 @@ static int cursorX = 0, cursorY = 0;
 void putc(char c);
 void puts(const char *s);
 void putd(int n);
-void putn(unsigned int n, int base);
+void putn(uint n, int base);
 void setcolor(enum vgaColor bg, enum vgaColor fg);
 void clear();
 void tInit();

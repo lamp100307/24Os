@@ -1,7 +1,7 @@
-#include "isr.h"
-#include "idt.h"
-#include "io.h"
-#include "stdio.h"
+#include "../inc/isr.h"
+#include "../inc/idt.h"
+#include "../inc/io.h"
+#include "../inc/stdio.h"
 
 #define PIC1_CMD 0x20
 #define PIC1_DATA 0x21
@@ -41,17 +41,17 @@ const char *exception_messages[32] = {
 static isr_t isr_handlers[32];
 static irq_t irq_handlers[16];
 
-void isrRegisterHandler(uint8_t n, isr_t handler) {
+void isrRegisterHandler(uchar n, isr_t handler) {
     if (n < 32) isr_handlers[n] = handler;
 }
 
-void irqRegisterHandler(uint8_t irq, irq_t handler) {
+void irqRegisterHandler(uchar irq, irq_t handler) {
     if (irq < 16) irq_handlers[irq] = handler;
 }
 
 static void pic_remap(void) {
-    uint8_t mask1 = inb(PIC1_DATA);
-    uint8_t mask2 = inb(PIC2_DATA);
+    uchar mask1 = inb(PIC1_DATA);
+    uchar mask2 = inb(PIC2_DATA);
 
     outb(PIC1_CMD,  0x11); io_wait();
     outb(PIC2_CMD,  0x11); io_wait();
@@ -66,8 +66,8 @@ static void pic_remap(void) {
     outb(PIC2_DATA, mask2);
 }
 
-extern uint32_t isr_stub_table[32];
-extern uint32_t irq_stub_table[16];
+extern uint isr_stub_table[32];
+extern uint irq_stub_table[16];
 
 void isrInit(void) {
     idtInit();
@@ -86,6 +86,7 @@ void isr_handler(registers_t *regs) {
     if (regs->int_no < 32 && isr_handlers[regs->int_no]) {
         isr_handlers[regs->int_no](regs);
     } else {
+        setcolor(BLACK, RED);
         printf("Unhandled exception %d (%s)  err=0x%x\n",
                regs->int_no,
                exception_messages[regs->int_no],
@@ -98,7 +99,7 @@ void irq_handler(registers_t *regs) {
     if (regs->int_no >= 40) outb(PIC2_CMD, PIC_EOI);
     outb(PIC1_CMD, PIC_EOI);
 
-    uint8_t irq_no = (uint8_t)(regs->int_no - 32);
+    uchar irq_no = (uchar)(regs->int_no - 32);
     if (irq_no < 16 && irq_handlers[irq_no])
         irq_handlers[irq_no](regs);
 }

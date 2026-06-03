@@ -1,4 +1,4 @@
-#include "stdio.h"
+#include "../inc/stdio.h"
 
 void putn(unsigned int n, int base) {
     if (n >= (unsigned int)base) putn(n / base, base);

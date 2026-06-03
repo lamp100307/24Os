@@ -4,19 +4,19 @@
 #include "types.h"
 
 struct IDTE {
-    uint16_t base_low;
-    uint16_t sel;
-    uint8_t zero;
-    uint8_t flags;
-    uint16_t base_high;
+    ushort base_low;
+    ushort sel;
+    uchar zero;
+    uchar flags;
+    ushort base_high;
 } __attribute__((packed));
 
 struct IDTP {
-    uint16_t limit;
-    uint32_t base;
+    ushort limit;
+    uint base;
 } __attribute__((packed));
 
 void idtInit();
-void setIdtGate(int n, uint32_t base, uint16_t sel, uint8_t flags);
+void setIdtGate(int n, uint base, ushort sel, uchar flags);
 
 #endif

@@ -1,10 +1,10 @@
 #ifndef PIT_H
 #define PIT_H
 
-#include <types.h>
+#include "types.h"
 
-void pitInit(uint32_t freq);
-uint32_t pitGetTicks(void);
-void pitSleep(uint32_t ms);
+void pitInit(uint freq);
+uint pitGetTicks(void);
+void pitSleep(uint ms);
 
 #endif

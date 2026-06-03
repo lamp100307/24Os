@@ -1,7 +1,7 @@
-#include "stdio.h"
-#include "gdt.h"
-#include "isr.h"
-#include "pit.h"
+#include "./inc/stdio.h"
+#include "./inc/gdt.h"
+#include "./inc/isr.h"
+#include "./inc/pit.h"
 
 void kentry(unsigned int mag, unsigned int *inf) {
     tInit();
@@ -10,15 +10,19 @@ void kentry(unsigned int mag, unsigned int *inf) {
     pitInit(100);
     __asm__ volatile ("sti");
 
-    printf("Welcome to 24Os %d!\n", 10);
+    printf("Welcome to 24Os!\n");
 
-    uint32_t last = 0;
+    uchar code[] = {0xB8, 0x64, 0x00, 0x00, 0x00,
+                    0x31, 0xD2,
+                    0xB9, 0x00, 0x00, 0x00, 0x00,
+                    0xF7, 0xF1,
+                    0xC3};
+
+    void (*main)() = (void(*)())code;
+
+    uint last = 0;
     while (1) {
+        main(); // will drop DE
         __asm__ volatile ("hlt");
-
-        uint32_t ticks = pitGetTicks();
-        if (ticks - last >= 10) {
-            printf("Ticks: %d\n", ticks);
-        }
     }
 }
