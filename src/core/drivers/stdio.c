@@ -32,6 +32,12 @@ void tInit() {
 void putc(char c) {
     if (c == '\n') { cursorX = 0; cursorY++; }
     else if (c == '\r') { cursorX = 0; }
+    else if (c == '\b') {
+        if (cursorX > 0) {
+            cursorX--;
+            VGA_MEM[cursorY * VGA_WIDTH + cursorX] = GET_CHAR(' ', currentColor);
+        }
+    }
     else {
         VGA_MEM[cursorY * VGA_WIDTH + cursorX] = GET_CHAR(c, currentColor);
         cursorX++;

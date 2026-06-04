@@ -2,27 +2,30 @@
 #include "./inc/gdt.h"
 #include "./inc/isr.h"
 #include "./inc/pit.h"
+#include "./inc/keyboard.h"
 
 void kentry(unsigned int mag, unsigned int *inf) {
     tInit();
     gdtInit();
     isrInit();
     pitInit(100);
+    keyboardInit();
     __asm__ volatile ("sti");
 
     printf("Welcome to 24Os!\n");
 
-    uchar code[] = {0xB8, 0x64, 0x00, 0x00, 0x00,
-                    0x31, 0xD2,
-                    0xB9, 0x00, 0x00, 0x00, 0x00,
-                    0xF7, 0xF1,
-                    0xC3};
-
-    void (*main)() = (void(*)())code;
-
     uint last = 0;
     while (1) {
-        main(); // will drop DE
+        printf("> ");
+        char command [128];
+        keyboardReadLine(command, 128);
+        if (command[0] == 'e' && command[1] == 'c' && command[2] == 'h' && command[3] == 'o') {
+            char* start = &command[4];
+            while (*start != '\0') {
+                printf("%c\n", *start);
+                start++;
+            }
+        }
         __asm__ volatile ("hlt");
     }
 }
