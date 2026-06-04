@@ -6,6 +6,7 @@
 #define KEYBOARD_BUFFER_SIZE 256
 
 void keyboardInit(void);
-void keyboardReadLine(char *buf, uint max);
+char keyboard_extra(void);
+void keyboardReadLine(char *b, uint max);
 
 #endif

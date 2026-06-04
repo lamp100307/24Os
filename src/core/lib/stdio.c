@@ -1,8 +1,8 @@
 #include "../inc/stdio.h"
-
-void putn(unsigned int n, int base) {
-    if (n >= (unsigned int)base) putn(n / base, base);
-    putc("0123456789ABCDEF"[n % base]);
+#include "../inc/io.h"
+void putn(unsigned int n, int b) {
+    if (n >= (unsigned int)b) putn(n / b, b);
+    putc("0123456789ABCDEF"[n % b]);
 }
 
 void printf(const char *fmt, ...) {
@@ -23,27 +23,29 @@ void printf(const char *fmt, ...) {
     va_end(arg);
 }
 
+void upd_cursor() {
+    unsigned short p = cursorY * VGA_WIDTH + cursorX;
+    outb(0x3D4, 0x0F); outb(0x3D5, (unsigned char)(p & 0xFF));
+    outb(0x3D4, 0x0E); outb(0x3D5, (unsigned char)((p >> 8) & 0xFF));
+}
+
 void tInit() {
     currentColor = GET_COLOR(BLACK, WHITE);
-    cursorX = 0; cursorY = 0;
+    cursorX = cursorY = 0;
     clear();
 }
 
 void putc(char c) {
     if (c == '\n') { cursorX = 0; cursorY++; }
-    else if (c == '\r') { cursorX = 0; }
+    else if (c == '\r') cursorX = 0;
     else if (c == '\b') {
-        if (cursorX > 0) {
-            cursorX--;
-            VGA_MEM[cursorY * VGA_WIDTH + cursorX] = GET_CHAR(' ', currentColor);
-        }
-    }
-    else {
-        VGA_MEM[cursorY * VGA_WIDTH + cursorX] = GET_CHAR(c, currentColor);
-        cursorX++;
+        if (cursorX > 0) VGA_MEM[cursorY * VGA_WIDTH + --cursorX] = GET_CHAR(' ', currentColor);
+    } else {
+        VGA_MEM[cursorY * VGA_WIDTH + cursorX++] = GET_CHAR(c, currentColor);
     }
     if (cursorX >= VGA_WIDTH) { cursorX = 0; cursorY++; }
     if (cursorY >= VGA_HEIGHT) { scroll(); cursorY = VGA_HEIGHT - 1; }
+    upd_cursor();
 }
 
 void puts(const char *s) { while (*s) putc(*s++); }
@@ -59,9 +61,10 @@ void setcolor(enum vgaColor bg, enum vgaColor fg) { currentColor = GET_COLOR(bg,
 void clear() {
     for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) VGA_MEM[i] = GET_CHAR(' ', currentColor);
     cursorX = cursorY = 0;
+    upd_cursor();
 }
 
-void setcursor(int x, int y) { cursorX = x; cursorY = y; }
+void setcursor(int x, int y) { cursorX = x; cursorY = y; upd_cursor(); }
 
 void scroll() {
     for (int i = VGA_WIDTH; i < VGA_WIDTH * VGA_HEIGHT; i++) VGA_MEM[i - VGA_WIDTH] = VGA_MEM[i];

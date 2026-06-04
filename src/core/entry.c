@@ -3,8 +3,9 @@
 #include "./inc/isr.h"
 #include "./inc/pit.h"
 #include "./inc/keyboard.h"
-
+#include "./inc/shell.h"
 void kentry(unsigned int mag, unsigned int *inf) {
+    (void)mag; (void)inf;
     tInit();
     gdtInit();
     isrInit();
@@ -14,18 +15,5 @@ void kentry(unsigned int mag, unsigned int *inf) {
 
     printf("Welcome to 24Os!\n");
 
-    uint last = 0;
-    while (1) {
-        printf("> ");
-        char command [128];
-        keyboardReadLine(command, 128);
-        if (command[0] == 'e' && command[1] == 'c' && command[2] == 'h' && command[3] == 'o') {
-            char* start = &command[4];
-            while (*start != '\0') {
-                printf("%c\n", *start);
-                start++;
-            }
-        }
-        __asm__ volatile ("hlt");
-    }
+    sh_loop();
 }
