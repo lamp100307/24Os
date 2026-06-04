@@ -7,7 +7,7 @@ static void sh_exe(char *c) {
     if (!strcmp(c, "clear") || !strcmp(c, "clr")) clear();
     else if (!strncmp(c, "echo ", 5)) printf("%s\n", c + 5);
     else if (!strcmp(c, "echo")) putc('\n');
-    else if (*c) printf("Unknown command: %s\n", c);
+    else if (*c) { printf("Unknown command: %s\n", c); }
 }
 
 void sh_loop(void) {

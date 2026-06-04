@@ -15,5 +15,5 @@ _start:
 
 section .bss
 align 16
-resb 1024
+resb 16384
 stack:

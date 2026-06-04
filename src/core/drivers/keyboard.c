@@ -5,25 +5,26 @@
 
 static volatile char caps = 0;
 static volatile char ctrl = 0;
+static volatile char shf = 0;
 static volatile char e0 = 0;
 static volatile char buf[KEYBOARD_BUFFER_SIZE];
 static volatile uint wr = 0;   
 static volatile uint rd = 0;   
 
 static const uchar scl[128] = {
-    0,    0x1B, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',
+    0, 0x1B, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',
     '\t', 'q','w','e','r','t','y','u','i','o','p','[',']', '\n',
-    0,    'a','s','d','f','g','h','j','k','l',';','\'','`',
-    0,   '\\','z','x','c','v','b','n','m',',','.','/', 0,
+    0, 'a','s','d','f','g','h','j','k','l',';','\'','`',
+    0, '\\','z','x','c','v','b','n','m',',','.','/', 0,
     '*', 0,   ' '
 };
 
 static const uchar scu[128] = {
-    0,    0x1B, '!','@','#','$','%','^','&','*','(',')','_','+', '\b',
+    0, 0x1B, '!','@','#','$','%','^','&','*','(',')','_','+', '\b',
     '\t', 'Q','W','E','R','T','Y','U','I','O','P','{','}', '\n',
-    0,    'A','S','D','F','G','H','J','K','L',':','"','~',
-    0,   '|','Z','X','C','V','B','N','M','<','>','?', 0,
-    '*', 0,   ' '
+    0, 'A','S','D','F','G','H','J','K','L',':','"','~',
+    0, '|','Z','X','C','V','B','N','M','<','>','?', 0,
+    '*', 0, ' '
 };
 
 static void kbd_enqueue(char c) {
@@ -46,10 +47,13 @@ static void keyboardCallback(registers_t *r) {
     uchar sc = inb(0x60);
     if (sc == 0xE0) { e0 = 1; return; }
     if (sc & 0x80) {
-        if ((sc & 0x7F) == 0x1D) ctrl = 0;
+        uchar brk = sc & 0x7F;
+        if (brk == 0x1D) ctrl = 0;
+        if (brk == 0x2A || brk == 0x36) shf = 0;
         e0 = 0; return;
     }
     if (sc == 0x1D) { ctrl = 1; e0 = 0; return; }
+    if (sc == 0x2A || sc == 0x36) { shf = 1; e0 = 0; return; }
     if (sc == 0x3A) { caps = !caps; e0 = 0; return; }
     if (e0) {
         e0 = 0;
@@ -58,7 +62,7 @@ static void keyboardCallback(registers_t *r) {
         return;
     }
     if (ctrl && sc == 0x26) { kbd_enqueue(11); return; }
-    uchar c = caps ? scu[sc] : scl[sc];
+    uchar c = (shf ^ caps) ? scu[sc] : scl[sc];
     if (c) kbd_enqueue(c);
 }
 
