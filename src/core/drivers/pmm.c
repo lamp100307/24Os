@@ -1,5 +1,6 @@
 #include "../inc/pmm.h"
 #include "../inc/string.h"
+#include "../inc/stdio.h"
 
 static uint32_t *map;
 static size_t blks = 0;
@@ -19,13 +20,21 @@ void pmminit(size_t sz, uintptr_t ram) {
         map[i / 32] &= ~(1 << (i % 32));
         usd--;
     }
+    size_t free = blks - usd;
+    printf("%CPMM %COK%C\n", WHITE, GREEN, WHITE);
+    printf("  RAM Size     : %x bytes\n", sz);
+    printf("  Bitmap Addr  : %x\n", ram);
+    printf("  Total Blocks : %x\n", blks);
+    printf("  Used Blocks  : %x\n", usd);
+    printf("  Free Blocks  : %x\n", free);
+    printf("  Block Size   : %x bytes\n", PMM_BLOCK_SIZE);
 }
 
 void *pmmalloc(void) {
     for (size_t i = 0; i < blks / 32; i++) {
         if (map[i] != 0xFFFFFFFF) {
             for (int b = 0; b < 32; b++) {
-                if (!(map[i] & (1 << b))) {
+                if (!(map[i] & (1 << b))) { 
                     size_t blk = i * 32 + b;
                     map[i] |= (1 << b);
                     usd++;

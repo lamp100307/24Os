@@ -1,6 +1,7 @@
 #include "../inc/vmm.h"
 #include "../inc/pmm.h"
 #include "../inc/string.h"
+#include "../inc/stdio.h"
 
 static uint32_t *pdr = NULL;
 
@@ -27,9 +28,21 @@ void vmmmap(uintptr_t v, uintptr_t f, int usr) {
 
 void vmminit(void) {
     pdr = (uint32_t *)pmmalloc();
+    if (!pdr) {
+        printf("VMM FAILED: no memory for page directory\n");
+        return;
+    }
     memset(pdr, 0, PMM_BLOCK_SIZE);
+    printf("VMM Creating page directory @ %x\n",(uint32_t)pdr);
+
     for (uintptr_t i = 0; i < 0x40000000; i += PMM_BLOCK_SIZE) {
         vmmmap(i, i, 0);
     }
+    printf("VMM Identity mapped 0x00000000 - 0x3FFFFFFF\n");
+    printf("  Page Directory : %x\n", (uint32_t)pdr);
+    printf("  Mapped Memory  : %x bytes\n", 0x40000000);
+    printf("  Page Size      : %x bytes\n", PMM_BLOCK_SIZE);
     vmmswitch((uintptr_t)pdr);
+    printf("%CVMM %COK%C\n",
+           WHITE, GREEN, WHITE);
 }
